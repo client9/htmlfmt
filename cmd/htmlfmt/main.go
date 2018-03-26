@@ -22,24 +22,24 @@ func main() {
 	var err error
 
 	kingpin.Parse()
-	if *flagFragment {
-		root := &html.Node{
-			Type:     html.ElementNode,
-			Data:     "div",
-			DataAtom: atom.Div,
+	if !*flagFragment {
+		err := htmlfmt.Format(os.Stdin, os.Stdout, *flagPrefix, *flagIndent)
+		if err != nil {
+			log.Fatal(err)
 		}
+		return
+	}
 
-		log.Printf("parsing fragment")
-		nodes, err = html.ParseFragment(os.Stdin, root)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		doc, err := html.Parse(os.Stdin)
-		if err != nil {
-			log.Fatal(err)
-		}
-		nodes = append(nodes, doc)
+	root := &html.Node{
+		Type:     html.ElementNode,
+		Data:     "div",
+		DataAtom: atom.Div,
+	}
+
+	log.Printf("parsing fragment")
+	nodes, err = html.ParseFragment(os.Stdin, root)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for _, n := range nodes {
