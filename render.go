@@ -86,10 +86,14 @@ func render1(w writer, n *html.Node, prefix, indent string, depth int) error {
 		if len(trimmed) > 0 {
 			return escape(w, n.Data)
 		}
-		// WANT: if a bunch of space, then emit 1 space
-		if n.Data == " " {
-			return escape(w, n.Data)
+
+		// if just spaces, then emit one space
+		// google docs HTML sometimes make adds a no-break-space
+		//
+		if len(strings.Trim(n.Data, " \u00a0")) == 0 {
+			return w.WriteByte(' ')
 		}
+		// likely a bunch of un-necessary newlines
 		return nil
 	case html.DocumentNode:
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
