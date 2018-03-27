@@ -80,7 +80,17 @@ func render1(w writer, n *html.Node, prefix, indent string, depth int) error {
 	case html.ErrorNode:
 		return errors.New("html: cannot render an ErrorNode node")
 	case html.TextNode:
-		return escape(w, n.Data)
+		trimmed := strings.TrimSpace(n.Data)
+
+		// clearly, if non-trvial text, emit
+		if len(trimmed) > 0 {
+			return escape(w, n.Data)
+		}
+		// WANT: if a bunch of space, then emit 1 space
+		if n.Data == " " {
+			return escape(w, n.Data)
+		}
+		return nil
 	case html.DocumentNode:
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			// depth is 0
